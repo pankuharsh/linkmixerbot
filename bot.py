@@ -1,20 +1,17 @@
-from telegram.ext import Application, CommandHandler, MessageHandler, Filters
+from telegram.ext import Application, CommandHandler, MessageHandler, filters
 from telegram import Update
 import os
 
-# BotFather से मिला टोकन (Heroku से लिया जाएगा)
-TOKEN = os.environ.get('TOKEN')  # Heroku से टोकन लेगा
-PORT = int(os.environ.get('PORT', '8443'))
-HEROKU_APP_NAME = os.environ.get('HEROKU_APP_NAME')
+TOKEN = os.environ.get('TOKEN')
+PORT = int(os.environ.get('PORT', 8443))
+WEBHOOK_URL = os.environ.get('WEBHOOK_URL')
 
-# /start कमांड
 async def start(update: Update, context):
     await update.message.reply_text(
         "हाय! मैं आपका Link Mixer Bot हूँ। मुझे एक लिंक और इमेज/वीडियो भेजें, मैं उसे आकर्षक पोस्ट में बदल दूंगा! 😎\n"
         "जानकारी के लिए /help टाइप करें।"
     )
 
-# /help कमांड
 async def help_command(update: Update, context):
     await update.message.reply_text(
         "🔥 बॉट का उपयोग कैसे करें:\n"
@@ -30,7 +27,6 @@ async def help_command(update: Update, context):
         "ग्रुप में उपयोग के लिए मुझे एडमिन बनाएं।"
     )
 
-# लिंक और अटैचमेंट हैंडल करें
 async def handle_message(update: Update, context):
     message = update.message
     chat_id = message.chat_id
@@ -66,8 +62,8 @@ def main():
     application = Application.builder().token(TOKEN).build()
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", help_command))
-    application.add_handler(MessageHandler(Filters.text | Filters.photo | Filters.video, handle_message))
-    application.run_webhook(listen="0.0.0.0", port=PORT, url_path=TOKEN, webhook_url=f"https://{HEROKU_APP_NAME}.herokuapp.com/{TOKEN}")
+    application.add_handler(MessageHandler(filters.TEXT | filters.PHOTO | filters.VIDEO, handle_message))
+    application.run_webhook(listen="0.0.0.0", port=PORT, url_path=TOKEN, webhook_url=WEBHOOK_URL)
 
 if __name__ == "__main__":
     main()
